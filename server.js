@@ -58,4 +58,33 @@ app.post('/api/notes', (req, res) => {
     }
 });
 
+// DELETE request for /api/notes/:id
+// Receive id, read from db.json, remove note with id, rewrite db.json
+app.delete('/api/notes/:id', (req, res) => {
+    const id = req.params.id;
+
+    fs.readFile(`${__dirname}/db/db.json`, 'utf8', (err, notes) => {
+        if (err) {
+            return res.status(500).json({ err });
+        }
+
+        const data = JSON.parse(notes);
+
+        data.forEach((element) => {
+            if (element.id === id) {
+                const indexToDelete = data.indexOf(element);
+                data.splice(indexToDelete, 1);
+            }
+        });
+
+        fs.writeFile(`${__dirname}/db/db.json`, JSON.stringify(data, null, 2), (err) => {
+            if (err) {
+                return res.status(500).json({ err });
+            }
+
+            res.send('Note deleted!');
+        });
+    });
+});
+
 app.listen(PORT, () => console.log(`Server listening on PORT http://localhost:${PORT}`));

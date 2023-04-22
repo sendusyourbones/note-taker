@@ -87,4 +87,8 @@ app.delete('/api/notes/:id', (req, res) => {
     });
 });
 
+app.get('*', (req, res) => {
+    res.sendFile(`${__dirname}/public/index.html`);
+});
+
 app.listen(PORT, () => console.log(`Server listening on PORT http://localhost:${PORT}`));

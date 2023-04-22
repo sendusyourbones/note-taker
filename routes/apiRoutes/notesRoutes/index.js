@@ -3,46 +3,47 @@ const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
 
-// Read the db.json file and return all saved notes as JSON at path /api/notes
-router.get('/', (req, res) => {
-    fs.readFile(path.join(__dirname, '..', '..', '..', 'db', 'db.json'), 'utf8', (err, notes) => {
-        if (err) {
-            return res.status(500).json({ err });
-        }
-
-        res.json(JSON.parse(notes));
-    });
-});
-
-// POST request for /api/notes
-// Receive note, assign id, add it to db.json, respond with new note
-router.post('/', (req, res) => {
-    const { title, text } = req.body;
-
-    if (title && text) {
-        const id = uuid.v4();
-
+router.route('/')
+    // GET request for /api/notes
+    // Read the db.json file and return all saved notes as JSON at path /api/notes
+    .get((req, res) => {
         fs.readFile(path.join(__dirname, '..', '..', '..', 'db', 'db.json'), 'utf8', (err, notes) => {
             if (err) {
                 return res.status(500).json({ err });
             }
+    
+            res.json(JSON.parse(notes));
+        });
+    })
+    // POST request for /api/notes
+    // Receive note, assign id, add it to db.json, respond with new note
+    .post((req, res) => {
+        const { title, text } = req.body;
 
-            const data = JSON.parse(notes);
+        if (title && text) {
+            const id = uuid.v4();
 
-            data.push({ title, text, id });
-
-            fs.writeFile(path.join(__dirname, '..', '..', '..', 'db', 'db.json'), JSON.stringify(data, null, 2), (err) => {
+            fs.readFile(path.join(__dirname, '..', '..', '..', 'db', 'db.json'), 'utf8', (err, notes) => {
                 if (err) {
                     return res.status(500).json({ err });
                 }
 
-                res.json({ title, text, id });
+                const data = JSON.parse(notes);
+
+                data.push({ title, text, id });
+
+                fs.writeFile(path.join(__dirname, '..', '..', '..', 'db', 'db.json'), JSON.stringify(data, null, 2), (err) => {
+                    if (err) {
+                        return res.status(500).json({ err });
+                    }
+
+                    res.json({ title, text, id });
+                });
             });
-        });
-    } else {
-        res.status(400).json({error: 'Title and text are required'});
-    }
-});
+        } else {
+            res.status(400).json({error: 'Title and text are required'});
+        }
+    });
 
 // DELETE request for /api/notes/:id
 // Receive id, read from db.json, remove note with id, rewrite db.json
